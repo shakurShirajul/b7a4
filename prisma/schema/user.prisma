@@ -1,0 +1,21 @@
+model User {
+    id           Int        @id @default(autoincrement())
+    email        String     @unique
+    passwordHash String
+    phone        String     @unique
+    avatarUrl    String?
+    role         Role       @default(TENANT)
+    status       UserStatus @default(ACTIVE)
+
+    refreshTokenHash      String?
+    refreshTokenExpiresAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    properties       Property[]
+    reviews          Review[]
+    payments         Payment[]
+    tenantRequests   Request[]  @relation("TenantRequests")
+    landlordRequests Request[]  @relation("LandlordRequests")
+}

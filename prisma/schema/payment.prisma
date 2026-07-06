@@ -1,0 +1,7 @@
+model Payment {
+    id Int @id @default(autoincrement())
+    user User @relation(fields: [userId], references: [id])
+    userId Int
+    transactionId String @unique
+
+}
