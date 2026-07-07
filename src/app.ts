@@ -8,6 +8,7 @@ import config from "./config";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { categoryRoutes } from "./modules/category/category.routes";
 import { rentalRoutes } from "./modules/rental/rental.routes";
+import { reviewRoutes } from "./modules/review/review.routes";
 
 
 const app: Application = express();
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/rentals", rentalRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 
 
