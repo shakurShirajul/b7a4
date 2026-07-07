@@ -19,7 +19,7 @@ const getUserByIdFromDB = async (userId: number) => {
         where: {
             id: userId
         },
-        omit:{
+        omit: {
             password: true
         }
     })
@@ -30,10 +30,10 @@ const registerUserIntoDB = async (userData: RegisterUserPayload) => {
     const { name, email, password, role } = userData;
 
     const isUserExist = await prisma.user.findUnique({
-        where: {email}
+        where: { email }
     })
 
-    if(isUserExist){
+    if (isUserExist) {
         throw new Error("User already exists");
     }
 
@@ -53,7 +53,7 @@ const registerUserIntoDB = async (userData: RegisterUserPayload) => {
 }
 
 const updateUserIntoDB = async (userId: number, userData: UpdateUserPayload) => {
-    const {name, email, password, phone, avatarUrl} = userData;
+    const { name, email, password, phone, avatarUrl } = userData;
     const hashedPassword = password
         ? await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
         : undefined;
@@ -77,6 +77,16 @@ const updateUserIntoDB = async (userId: number, userData: UpdateUserPayload) => 
 }
 
 const updateStatusIntoDB = async (userId: number, status: UserStatus) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        }
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+    
     const updatedUser = await prisma.user.update({
         where: {
             id: userId
@@ -89,9 +99,9 @@ const updateStatusIntoDB = async (userId: number, status: UserStatus) => {
         }
     });
     return updatedUser;
-}   
+}
 
-export const userService ={
+export const userService = {
     getAllUsersFromDB,
     getUserByIdFromDB,
     registerUserIntoDB,
