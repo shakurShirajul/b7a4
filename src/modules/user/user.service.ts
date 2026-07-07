@@ -6,7 +6,11 @@ import { Role, UserStatus } from "../../../prisma/generated/prisma/client";
 
 
 const getAllUsersFromDB = async () => {
-    const users = await prisma.user.findMany({});
+    const users = await prisma.user.findMany({
+        omit: {
+            password: true
+        }
+    });
     return users;
 }
 
@@ -14,6 +18,9 @@ const getUserByIdFromDB = async (userId: number) => {
     const user = await prisma.user.findUnique({
         where: {
             id: userId
+        },
+        omit:{
+            password: true
         }
     })
     return user;
