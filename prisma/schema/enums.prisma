@@ -15,7 +15,7 @@ enum PropertyStatus {
     PENDING
 }
 
-enum RequestStatus {
+enum RentalStatus {
     PENDING
     APPROVED
     REJECTED

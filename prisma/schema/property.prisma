@@ -16,7 +16,7 @@ model Property {
     isAvailable Boolean        @default(true)
     status      PropertyStatus @default(ACTIVE)
 
-    requests Request[]
+    rentals  Rental[]
     reviews  Review[]
 
     createdAt DateTime @default(now())

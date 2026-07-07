@@ -4,8 +4,8 @@ model Review {
     propertyId Int
     tenant     User     @relation(fields: [tenantId], references: [id])
     tenantId   Int
-    request    Request  @relation(fields: [requestId], references: [id])
-    requestId  Int      @unique
+    rental     Rental   @relation(fields: [rentalId], references: [id])
+    rentalId   Int      @unique
     rating     Int
     comment    String?
 

@@ -7,6 +7,7 @@ import { authRoutes } from "./modules/auth/auth.routes";
 import config from "./config";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { categoryRoutes } from "./modules/category/category.routes";
+import { rentalRoutes } from "./modules/rental/rental.routes";
 
 
 const app: Application = express();
@@ -26,6 +27,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/rentals", rentalRoutes);
 
 
 

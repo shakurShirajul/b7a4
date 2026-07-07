@@ -1,4 +1,4 @@
-model Request {
+model Rental {
     id         Int      @id @default(autoincrement())
     property   Property @relation(fields: [propertyId], references: [id])
     propertyId Int
@@ -7,7 +7,7 @@ model Request {
     landLord   User     @relation("LandlordRequests", fields: [landLordId], references: [id])
     landLordId Int
     message    String
-    status     RequestStatus @default(PENDING)
+    status     RentalStatus @default(PENDING)
 
     review Review?
 

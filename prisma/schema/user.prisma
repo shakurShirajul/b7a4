@@ -17,6 +17,6 @@ model User {
     properties       Property[]
     reviews          Review[]
     payments         Payment[]
-    tenantRequests   Request[]  @relation("TenantRequests")
-    landlordRequests Request[]  @relation("LandlordRequests")
+    tenantRequests   Rental[]   @relation("TenantRequests")
+    landlordRequests Rental[]   @relation("LandlordRequests")
 }
