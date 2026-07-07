@@ -3,6 +3,7 @@ model Property {
     landlord    User           @relation(fields: [landlordId], references: [id])
     landlordId  Int
     category    Category       @relation(fields: [categoryId], references: [id])
+    categoryId  Int
     title       String
     description String?
     address     String
@@ -14,7 +15,6 @@ model Property {
     amenities   String
     isAvailable Boolean        @default(true)
     status      PropertyStatus @default(ACTIVE)
-    categoryId  Int
 
     requests Request[]
     reviews  Review[]

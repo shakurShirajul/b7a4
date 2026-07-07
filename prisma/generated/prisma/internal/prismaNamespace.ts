@@ -965,12 +965,15 @@ export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof 
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   email: 'email',
-  passwordHash: 'passwordHash',
+  password: 'password',
   phone: 'phone',
   avatarUrl: 'avatarUrl',
   role: 'role',
   status: 'status',
+  refreshTokenHash: 'refreshTokenHash',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
