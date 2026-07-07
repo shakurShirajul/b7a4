@@ -2,6 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { ZodError } from "zod";
 
+type TErrorDetails = {
+    path?: (string | number)[];
+    message: string;
+};
+
 export const globalErrorHandler = (
     error: Error,
     req: Request,
@@ -11,16 +16,24 @@ export const globalErrorHandler = (
     if (error instanceof ZodError) {
         res.status(httpStatus.BAD_REQUEST).json({
             success: false,
-            statusCode: httpStatus.BAD_REQUEST,
             message: "Validation failed",
-            errors: error.issues,
+            errorDetails: error.issues.map((issue) => ({
+                path: issue.path,
+                message: issue.message,
+            })),
         });
         return;
     }
 
+    const errorDetails: TErrorDetails[] = [
+        {
+            message: error.message || "Something went wrong",
+        },
+    ];
+
     res.status(httpStatus.BAD_REQUEST).json({
         success: false,
-        statusCode: httpStatus.BAD_REQUEST,
         message: error.message || "Something went wrong",
+        errorDetails,
     });
 };
