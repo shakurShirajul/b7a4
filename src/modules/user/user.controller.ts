@@ -4,6 +4,25 @@ import { userService } from "./user.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
+const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const users = await userService.getAllUsersFromDB();
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Users fetched successfully",
+        data: users
+    })
+})
+
+const getUserById = catchAsync(async(req: Request, res: Response, next: NextFunction) => {
+    const user = await userService.getUserByIdFromDB(Number(req.params.id));
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User fetched successfully",
+        data: user
+    })
+})
 
 const registerUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
@@ -38,7 +57,24 @@ const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     })
 })
 
+const udpateUserStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {  
+    const userId = req.params.id;
+    const { status } = req.body;
+
+    const user = await userService.updateStatusIntoDB(Number(userId), status);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User status updated successfully",
+        data: user
+    })
+})
+
 export const userController = {
+    getAllUsers,
+    getUserById,
     registerUser,
-    updateUser
+    updateUser,
+    udpateUserStatus
 }
