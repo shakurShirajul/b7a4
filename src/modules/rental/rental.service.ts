@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { IRental } from "./rental.interface"
+import { ICreateRentalPayload, IUpdateRentalPayload, IUpdateRentalStatusPayload } from "./rental.interface"
 
 type RentalFilter = {
     tenantId?: number;
@@ -13,20 +13,79 @@ const getAllRentalsFromDB = async (filter?: RentalFilter) => {
     return rentals;
 }
 
-const getRentalByIdFromDB = async (rentalId: number) => {
-
+const getRentalByIdFromDB = async (rentalId: number, filter?: RentalFilter) => {
+    const rental = await prisma.rental.findFirst({
+        where: {
+            id: rentalId,
+            ...filter,
+        },
+    });
+    return rental;
 }
 
-const createRentalIntoDB = async (rentalData: IRental) => {
+const createRentalIntoDB = async (rentalData: ICreateRentalPayload) => {
+    const { propertyId, tenantId, message } = rentalData;
 
+    const propertyExist = await prisma.property.findUnique({
+        where: {
+            id: propertyId
+        }
+    });
+
+    if (!propertyExist) {
+        throw new Error("Property not found");
+    }
+
+    const rental = await prisma.rental.create({
+        data: {
+            landLordId: propertyExist.landlordId,
+            propertyId,
+            tenantId,
+            message,
+        }
+    });
+    return rental;
 }
 
-const updateRentalIntoDB = async (rentalId: number, rentalData: Partial<IRental >) => {
+const updateRentalIntoDB = async (rentalData: IUpdateRentalPayload) => {
+    const { rentalId, message, tenantId } = rentalData;
 
+    const rental = await prisma.rental.update({
+        where: {
+            id: rentalId,
+            tenantId
+        },
+        data: {
+            message
+        }
+    });
+
+    return rental;
 }
 
-const deleteRentalFromDB = async (rentalId: number) => {
+const deleteRentalFromDB = async (rentalId: number, tenantId: number) => {
+    const rental = await prisma.rental.delete({
+        where: {
+            id: rentalId,
+            tenantId
+        }
+    });
+    return rental;
+}
 
+const updateRentalStatusIntoDB = async (rentalData: IUpdateRentalStatusPayload) => {
+    const { rentalId, status, landlordId } = rentalData;
+
+    const rental = await prisma.rental.update({
+        where: {
+            id: rentalId,
+            landLordId: landlordId
+        },
+        data: {
+            status
+        }
+    });
+    return rental;
 }
 
 export const rentalService = {
@@ -34,5 +93,6 @@ export const rentalService = {
     getRentalByIdFromDB,
     createRentalIntoDB,
     updateRentalIntoDB,
-    deleteRentalFromDB
+    deleteRentalFromDB,
+    updateRentalStatusIntoDB
 }
