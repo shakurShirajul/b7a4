@@ -13,4 +13,4 @@ export interface UpdateUserPayload{
     password?: string
     phone?: string
     avatarUrl?: string
-}``
+}
