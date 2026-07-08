@@ -42,7 +42,7 @@ const getAllPayments = catchAsync(async (req: Request, res: Response, next: Next
     if (userRole === "ADMIN") {
         payments = await paymentService.getAllPaymentsFromDB();
     } else if (userRole === "LANDLORD") {
-        payments = await paymentService.getAllPaymentsFromDB({ landLordId: Number(userId) });
+        payments = await paymentService.getAllPaymentsFromDB({ landlordId: Number(userId) });
     } else {
         payments = await paymentService.getAllPaymentsFromDB({ payerId: Number(userId) });
     }
@@ -65,7 +65,7 @@ const getPaymentById = catchAsync(async (req: Request, res: Response, next: Next
     if (userRole === "ADMIN") {
         payment = await paymentService.getPaymentByIdFromDB(paymentId);
     } else if (userRole === "LANDLORD") {
-        payment = await paymentService.getPaymentByIdFromDB(paymentId, { landLordId: Number(userId) });
+        payment = await paymentService.getPaymentByIdFromDB(paymentId, { landlordId: Number(userId) });
     } else {
         payment = await paymentService.getPaymentByIdFromDB(paymentId, { payerId: Number(userId) });
     }

@@ -6,7 +6,7 @@ import { propertyValidation } from "./property.validation";
 
 const router: Router = Router();
 
-router.get("", propertyController.getAllProperties);
+router.get("", validateRequest(propertyValidation.propertyQueryValidation), propertyController.getAllProperties);
 router.get("/:id", validateRequest(propertyValidation.idParamValidation), propertyController.getPropertyById);
 router.post("/", auth("LANDLORD"), validateRequest(propertyValidation.createPropertyValidation), propertyController.createProperty);
 router.patch("/:id", auth("LANDLORD"), validateRequest(propertyValidation.updatePropertyValidation), propertyController.updateProperty);

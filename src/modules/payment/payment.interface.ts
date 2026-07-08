@@ -5,5 +5,5 @@ export interface ICreatePaymentPayload {
 
 export interface IPaymentFilter {
     payerId?: number;
-    landLordId?: number;
+    landlordId?: number;
 }

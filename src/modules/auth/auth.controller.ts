@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { authService } from "./auth.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { AppError } from "../../errors/AppError";
 
 const refreshTokenCookieName = "refreshToken";
 
@@ -34,7 +35,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response, next: NextFu
     const token = req.cookies?.[refreshTokenCookieName] || req.body?.refreshToken;
 
     if (!token) {
-        throw new Error("Refresh token is required");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Refresh token is required");
     }
 
     const result = await authService.refreshToken(token);

@@ -1,18 +1,25 @@
 model Payment {
-    id                      Int             @id @default(autoincrement())
-    payer                   User            @relation(fields: [payerId], references: [id])
-    payerId                 Int
-    rental                  Rental          @relation(fields: [rentalId], references: [id])
-    rentalId                Int
-    transactionId           String          @unique
-    provider                PaymentProvider @default(STRIPE)
-    amount                  Decimal         @db.Decimal(10, 2)
-    currency                String          @default("bdt")
-    status                  PaymentStatus   @default(PENDING)
-    stripeCheckoutSessionId String?         @unique
-    stripePaymentIntentId   String?         @unique
-    paidAt                  DateTime?
+  id                      Int             @id @default(autoincrement())
+  payer                   User            @relation(fields: [payerId], references: [id])
+  payerId                 Int
+  rental                  Rental          @relation(fields: [rentalId], references: [id])
+  rentalId                Int
+  transactionId           String          @unique
+  provider                PaymentProvider @default(STRIPE)
+  amount                  Decimal         @db.Decimal(10, 2)
+  currency                String          @default("bdt")
+  status                  PaymentStatus   @default(PENDING)
+  stripeCheckoutSessionId String?         @unique
+  stripePaymentIntentId   String?         @unique
+  paidAt                  DateTime?
+  failureReason           String?
+  refundedAt              DateTime?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([payerId])
+  @@index([rentalId])
+  @@index([status])
+  @@index([provider])
 }

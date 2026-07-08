@@ -1,24 +1,36 @@
 model Property {
-    id          Int            @id @default(autoincrement())
-    landlord    User           @relation(fields: [landlordId], references: [id])
-    landlordId  Int
-    category    Category       @relation(fields: [categoryId], references: [id])
-    categoryId  Int
-    title       String
-    description String?
-    address     String
-    city        String
-    state       String?
-    country     String
-    postalCode  String?
-    price       Decimal        @db.Decimal(10, 2)
-    amenities   String
-    isAvailable Boolean        @default(true)
-    status      PropertyStatus @default(ACTIVE)
+  id          Int            @id @default(autoincrement())
+  landlord    User           @relation(fields: [landlordId], references: [id])
+  landlordId  Int
+  category    Category       @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  title       String
+  description String?
+  address     String
+  city        String
+  state       String?
+  country     String
+  postalCode  String?
+  price       Decimal        @db.Decimal(10, 2)
+  amenities   String
+  images      String[]       @default([])
+  latitude    Decimal?       @db.Decimal(9, 6)
+  longitude   Decimal?       @db.Decimal(9, 6)
+  isAvailable Boolean        @default(true)
+  status      PropertyStatus @default(ACTIVE)
+  deletedAt   DateTime?
 
-    rentals  Rental[]
-    reviews  Review[]
+  rentals Rental[]
+  reviews Review[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([city])
+  @@index([country])
+  @@index([categoryId])
+  @@index([landlordId])
+  @@index([status, isAvailable])
+  @@index([price])
+  @@index([deletedAt])
 }

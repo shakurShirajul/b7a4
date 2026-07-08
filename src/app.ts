@@ -15,8 +15,20 @@ import { paymentController } from "./modules/payment/payment.controller";
 
 const app: Application = express();
 
+const allowedOrigins = [
+    config.app_url,
+    config.client_url,
+].filter(Boolean);
+
 app.use(cors({
-    origin: config.app_url,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+
+        callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
 }));
 app.post("/api/payments/webhook", express.raw({ type: "application/json" }), paymentController.handleStripeWebhook);

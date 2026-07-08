@@ -3,6 +3,8 @@ import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import type { TAuthTokens, TJwtPayload, TLoginPayload } from "./auth.interface";
+import { AppError } from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const getRefreshTokenExpiresAt = () => {
     const expiresIn = config.jwt_refresh_expires_in || "30d";
@@ -71,17 +73,17 @@ const loginUser = async (payload: TLoginPayload) => {
     });
 
     if (!user) {
-        throw new Error("Invalid email or password");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email or password");
     }
 
     if (user.status !== "ACTIVE") {
-        throw new Error("User account is not active");
+        throw new AppError(httpStatus.FORBIDDEN, "User account is not active");
     }
 
     const isPasswordMatched = await bcrypt.compare(payload.password, user.password);
 
     if (!isPasswordMatched) {
-        throw new Error("Invalid email or password");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email or password");
     }
 
     const tokenPayload: TJwtPayload = {
@@ -113,7 +115,7 @@ const refreshToken = async (token: string) => {
     try {
         decoded = jwt.verify(token, config.jwt_refresh_secret) as TJwtPayload;
     } catch {
-        throw new Error("Invalid refresh token");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Invalid refresh token");
     }
 
     const user = await prisma.user.findUnique({
@@ -123,21 +125,21 @@ const refreshToken = async (token: string) => {
     });
 
     if (!user || !user.refreshTokenHash || !user.refreshTokenExpiresAt) {
-        throw new Error("Invalid refresh token");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Invalid refresh token");
     }
 
     if (user.status !== "ACTIVE") {
-        throw new Error("User account is not active");
+        throw new AppError(httpStatus.FORBIDDEN, "User account is not active");
     }
 
     if (user.refreshTokenExpiresAt < new Date()) {
-        throw new Error("Refresh token expired");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Refresh token expired");
     }
 
     const isTokenMatched = await bcrypt.compare(token, user.refreshTokenHash);
 
     if (!isTokenMatched) {
-        throw new Error("Invalid refresh token");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Invalid refresh token");
     }
 
     const tokenPayload: TJwtPayload = {

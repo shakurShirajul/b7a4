@@ -3,6 +3,8 @@ import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import { RegisterUserPayload, UpdateUserPayload } from "./user.interface";
 import { Role, UserStatus } from "../../../prisma/generated/prisma/client";
+import { AppError } from "../../errors/AppError";
+import httpStatus from "http-status";
 
 
 const getAllUsersFromDB = async () => {
@@ -23,18 +25,22 @@ const getUserByIdFromDB = async (userId: number) => {
             password: true
         }
     })
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
     return user;
 }
 
 const registerUserIntoDB = async (userData: RegisterUserPayload) => {
-    const { name, email, password, role } = userData;
+    const { name, email, password, role, phone } = userData;
 
     const isUserExist = await prisma.user.findUnique({
         where: { email }
     })
 
     if (isUserExist) {
-        throw new Error("User already exists");
+        throw new AppError(httpStatus.CONFLICT, "User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds));
@@ -45,7 +51,11 @@ const registerUserIntoDB = async (userData: RegisterUserPayload) => {
             name,
             email,
             password: hashedPassword,
-            role: userRole
+            role: userRole,
+            phone
+        },
+        omit: {
+            password: true
         }
     });
 
@@ -84,7 +94,7 @@ const updateStatusIntoDB = async (userId: number, status: UserStatus) => {
     });
 
     if (!user) {
-        throw new Error("User not found");
+        throw new AppError(httpStatus.NOT_FOUND, "User not found");
     }
     
     const updatedUser = await prisma.user.update({

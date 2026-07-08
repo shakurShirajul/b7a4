@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync"
 import { rentalService } from "./rental.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { AppError } from "../../errors/AppError";
 
 const getAllRentals = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userRole = req.user?.role;
@@ -14,9 +15,9 @@ const getAllRentals = catchAsync(async (req: Request, res: Response, next: NextF
     } else if (userRole === "TENANT") {
         rentals = await rentalService.getAllRentalsFromDB({ tenantId: Number(userId) });
     } else if (userRole === "LANDLORD") {
-        rentals = await rentalService.getAllRentalsFromDB({ landLordId: Number(userId) });
+        rentals = await rentalService.getAllRentalsFromDB({ landlordId: Number(userId) });
     } else {
-        throw new Error("You are not authorized");
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
 
     return sendResponse(res, {
@@ -38,13 +39,13 @@ const getRentalById = catchAsync(async (req: Request, res: Response, next: NextF
     } else if (userRole === "TENANT") {
         rental = await rentalService.getRentalByIdFromDB(Number(rentalId), { tenantId: Number(userId) });
     } else if (userRole === "LANDLORD") {
-        rental = await rentalService.getRentalByIdFromDB(Number(rentalId), { landLordId: Number(userId) });
+        rental = await rentalService.getRentalByIdFromDB(Number(rentalId), { landlordId: Number(userId) });
     } else {
-        throw new Error("You are not authorized");
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
 
     if (!rental) {
-        throw new Error("Rental not found");
+        throw new AppError(httpStatus.NOT_FOUND, "Rental not found");
     }
 
     return sendResponse(res, {
@@ -57,8 +58,8 @@ const getRentalById = catchAsync(async (req: Request, res: Response, next: NextF
 
 const createRental = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId;
-    const { message, propertyId } = req.body;
-    const rental = await rentalService.createRentalIntoDB({ message, propertyId, tenantId: Number(userId) });
+    const { message, propertyId, moveInDate, startDate, endDate } = req.body;
+    const rental = await rentalService.createRentalIntoDB({ message, propertyId, moveInDate, startDate, endDate, tenantId: Number(userId) });
     return sendResponse(res, {
         success: true,
         statusCode: httpStatus.CREATED,
@@ -70,10 +71,13 @@ const createRental = catchAsync(async (req: Request, res: Response, next: NextFu
 const updateRental = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId;
     const rentalId = req.params.id;
-    const { message } = req.body;
+    const { message, moveInDate, startDate, endDate } = req.body;
     const rental = await rentalService.updateRentalIntoDB({
         rentalId: Number(rentalId),
         message,
+        moveInDate,
+        startDate,
+        endDate,
         tenantId: Number(userId)
     });
     return sendResponse(res, {

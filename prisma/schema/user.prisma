@@ -1,22 +1,31 @@
 model User {
-    id        Int        @id @default(autoincrement())
-    name      String
-    email     String     @unique
-    password  String
-    phone     String?    @unique
-    avatarUrl String?
-    role      Role       @default(TENANT)
-    status    UserStatus @default(ACTIVE)
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  phone     String?    @unique
+  avatarUrl String?
+  role      Role       @default(TENANT)
+  status    UserStatus @default(ACTIVE)
 
-    refreshTokenHash      String?
-    refreshTokenExpiresAt DateTime?
+  refreshTokenHash       String?
+  refreshTokenExpiresAt  DateTime?
+  lastLoginAt            DateTime?
+  emailVerifiedAt        DateTime?
+  passwordResetToken     String?
+  passwordResetExpiresAt DateTime?
+  deletedAt              DateTime?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    properties       Property[]
-    reviews          Review[]
-    payments         Payment[]
-    tenantRequests   Rental[]   @relation("TenantRequests")
-    landlordRequests Rental[]   @relation("LandlordRequests")
+  properties       Property[]
+  reviews          Review[]
+  payments         Payment[]
+  tenantRequests   Rental[]   @relation("TenantRequests")
+  landlordRequests Rental[]   @relation("LandlordRequests")
+
+  @@index([role])
+  @@index([status])
+  @@index([deletedAt])
 }

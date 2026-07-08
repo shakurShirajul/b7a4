@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { ZodError } from "zod";
+import { AppError } from "../errors/AppError";
+import { Prisma } from "../../prisma/generated/prisma/client";
 
 type TErrorDetails = {
     path?: (string | number)[];
@@ -25,13 +27,43 @@ export const globalErrorHandler = (
         return;
     }
 
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        const statusCodeByCode: Record<string, number> = {
+            P2002: httpStatus.CONFLICT,
+            P2003: httpStatus.BAD_REQUEST,
+            P2025: httpStatus.NOT_FOUND,
+        };
+        const messageByCode: Record<string, string> = {
+            P2002: "Duplicate value violates a unique constraint",
+            P2003: "Invalid relation reference",
+            P2025: "Record not found",
+        };
+        const statusCode = statusCodeByCode[error.code] || httpStatus.BAD_REQUEST;
+        const message = messageByCode[error.code] || error.message;
+
+        res.status(statusCode).json({
+            success: false,
+            message,
+            errorDetails: [
+                {
+                    message,
+                },
+            ],
+        });
+        return;
+    }
+
+    const statusCode = error instanceof AppError
+        ? error.statusCode
+        : httpStatus.INTERNAL_SERVER_ERROR;
+
     const errorDetails: TErrorDetails[] = [
         {
             message: error.message || "Something went wrong",
         },
     ];
 
-    res.status(httpStatus.BAD_REQUEST).json({
+    res.status(statusCode).json({
         success: false,
         message: error.message || "Something went wrong",
         errorDetails,

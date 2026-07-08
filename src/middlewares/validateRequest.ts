@@ -4,11 +4,19 @@ import { z } from "zod";
 export const validateRequest = (schema: z.ZodType) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await schema.parseAsync({
+            const parsedData = await schema.parseAsync({
                 body: req.body,
                 params: req.params,
                 query: req.query,
-            });
+            }) as {
+                body?: Request["body"];
+                params?: Request["params"];
+                query?: Request["query"];
+            };
+
+            req.body = parsedData.body ?? req.body;
+            req.params = parsedData.params ?? req.params;
+            req.query = parsedData.query ?? req.query;
 
             next();
         } catch (error) {

@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+const idParamValidation = z.object({
+    params: z.object({
+        id: z.coerce.number().int().positive("Invalid review id"),
+    }),
+});
+
+const propertyIdParamValidation = z.object({
+    params: z.object({
+        propertyId: z.coerce.number().int().positive("Invalid property id"),
+    }),
+});
+
 const createReviewValidation = z.object({
     body: z.object({
         propertyId: z.coerce.number().int().positive("Invalid property id"),
@@ -10,5 +22,7 @@ const createReviewValidation = z.object({
 });
 
 export const reviewValidation = {
+    idParamValidation,
+    propertyIdParamValidation,
     createReviewValidation,
 };

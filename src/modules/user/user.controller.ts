@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { userService } from "./user.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { AppError } from "../../errors/AppError";
 
 const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const users = await userService.getAllUsersFromDB();
@@ -24,10 +25,24 @@ const getUserById = catchAsync(async(req: Request, res: Response, next: NextFunc
     })
 })
 
+const getMe = catchAsync(async(req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "You are not authenticated");
+    }
+
+    const user = await userService.getUserByIdFromDB(Number(userId));
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User fetched successfully",
+        data: user
+    })
+})
+
 const registerUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-
-    console.log("Payload received in controller:", payload); // Debugging line
 
     const user = await userService.registerUserIntoDB(payload);
 
@@ -44,7 +59,7 @@ const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     const userId = req.user?.userId;
 
     if (!userId) {
-        throw new Error("You are not authenticated");
+        throw new AppError(httpStatus.UNAUTHORIZED, "You are not authenticated");
     }
 
     const user = await userService.updateUserIntoDB(userId, payload);
@@ -74,6 +89,7 @@ const udpateUserStatus = catchAsync(async (req: Request, res: Response, next: Ne
 export const userController = {
     getAllUsers,
     getUserById,
+    getMe,
     registerUser,
     updateUser,
     udpateUserStatus

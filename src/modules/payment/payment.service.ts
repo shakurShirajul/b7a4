@@ -3,10 +3,12 @@ import { randomUUID } from "crypto";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import { ICreatePaymentPayload, IPaymentFilter } from "./payment.interface";
+import { AppError } from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const getStripeClient = () => {
     if (!config.stripe_secret_key) {
-        throw new Error("Stripe secret key is not configured");
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Stripe secret key is not configured");
     }
 
     return new Stripe(config.stripe_secret_key);
@@ -28,11 +30,25 @@ const createPaymentIntoDB = async (payload: ICreatePaymentPayload) => {
     });
 
     if (!rental) {
-        throw new Error("Rental not found");
+        throw new AppError(httpStatus.NOT_FOUND, "Rental not found");
     }
 
     if (rental.status !== "APPROVED") {
-        throw new Error("Payment is only allowed for approved rentals");
+        throw new AppError(httpStatus.BAD_REQUEST, "Payment is only allowed for approved rentals");
+    }
+
+    const existingPayment = await prisma.payment.findFirst({
+        where: {
+            rentalId,
+            payerId,
+            status: {
+                in: ["PENDING", "COMPLETED"],
+            },
+        },
+    });
+
+    if (existingPayment) {
+        throw new AppError(httpStatus.CONFLICT, "Payment already exists for this rental");
     }
 
     const amount = Number(rental.property.price);
@@ -95,7 +111,7 @@ const confirmStripePaymentIntoDB = async (sessionId: string) => {
     });
 
     if (!payment) {
-        throw new Error("Payment not found");
+        throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
     }
 
     const paymentIntentId = typeof session.payment_intent === "string"
@@ -104,24 +120,40 @@ const confirmStripePaymentIntoDB = async (sessionId: string) => {
 
     const status = session.payment_status === "paid" ? "COMPLETED" : "FAILED";
 
-    return prisma.payment.update({
-        where: {
-            id: payment.id,
-        },
-        data: {
-            status,
-            stripePaymentIntentId: paymentIntentId,
-            paidAt: status === "COMPLETED" ? new Date() : null,
-        },
-    });
+    const [updatedPayment] = await prisma.$transaction([
+        prisma.payment.update({
+            where: {
+                id: payment.id,
+            },
+            data: {
+                status,
+                stripePaymentIntentId: paymentIntentId,
+                paidAt: status === "COMPLETED" ? new Date() : null,
+            },
+        }),
+        ...(status === "COMPLETED"
+            ? [
+                prisma.rental.update({
+                    where: {
+                        id: payment.rentalId,
+                    },
+                    data: {
+                        status: "ACTIVE",
+                    },
+                }),
+            ]
+            : []),
+    ]);
+
+    return updatedPayment;
 };
 
 const getAllPaymentsFromDB = async (filter?: IPaymentFilter) => {
-    const { landLordId, ...paymentFilter } = filter || {};
+    const { landlordId, ...paymentFilter } = filter || {};
     const payments = await prisma.payment.findMany({
         where: {
             ...paymentFilter,
-            ...(landLordId ? { rental: { landLordId } } : {}),
+            ...(landlordId ? { rental: { landlordId } } : {}),
         },
         orderBy: {
             createdAt: "desc",
@@ -139,12 +171,12 @@ const getAllPaymentsFromDB = async (filter?: IPaymentFilter) => {
 };
 
 const getPaymentByIdFromDB = async (paymentId: number, filter?: IPaymentFilter) => {
-    const { landLordId, ...paymentFilter } = filter || {};
+    const { landlordId, ...paymentFilter } = filter || {};
     const payment = await prisma.payment.findFirst({
         where: {
             id: paymentId,
             ...paymentFilter,
-            ...(landLordId ? { rental: { landLordId } } : {}),
+            ...(landlordId ? { rental: { landlordId } } : {}),
         },
         include: {
             rental: {
@@ -156,7 +188,7 @@ const getPaymentByIdFromDB = async (paymentId: number, filter?: IPaymentFilter) 
     });
 
     if (!payment) {
-        throw new Error("Payment not found");
+        throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
     }
 
     return payment;
@@ -166,11 +198,11 @@ const handleStripeWebhook = async (payload: Buffer, signature?: string) => {
     const stripe = getStripeClient();
 
     if (!config.stripe_webhook_secret) {
-        throw new Error("Stripe webhook secret is not configured");
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Stripe webhook secret is not configured");
     }
 
     if (!signature) {
-        throw new Error("Stripe signature is required");
+        throw new AppError(httpStatus.BAD_REQUEST, "Stripe signature is required");
     }
 
     const event = stripe.webhooks.constructEvent(

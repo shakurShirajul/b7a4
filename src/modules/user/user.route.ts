@@ -7,7 +7,7 @@ import { userValidation } from "./user.validation";
 const router: Router = Router()
 
 router.get("/", auth("ADMIN"), userController.getAllUsers);
-router.get("/me", auth(), userController.getUserById);
+router.get("/me", auth(), userController.getMe);
 router.get("/:id", auth("ADMIN"), validateRequest(userValidation.idParamValidation), userController.getUserById);
 router.post("/register", validateRequest(userValidation.registerUserValidation), userController.registerUser);
 router.patch("/update", auth(), validateRequest(userValidation.updateUserValidation), userController.updateUser);
