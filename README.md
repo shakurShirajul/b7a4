@@ -33,6 +33,12 @@ The seed script upserts this admin user. You can override the credentials with `
 pnpm seed:admin
 ```
 
+To seed the database with demo users, categories, properties, rentals, Stripe-style completed payments, and reviews:
+
+```bash
+pnpm seed
+```
+
 ## API Documentation
 
 Postman documentation is available in:
@@ -119,6 +125,7 @@ If the production database already exists, run migrations before using the new r
 ```bash
 pnpm prisma migrate deploy
 pnpm seed:admin
+pnpm seed
 ```
 
 ## Core Routes

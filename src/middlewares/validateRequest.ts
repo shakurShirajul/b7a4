@@ -11,12 +11,12 @@ export const validateRequest = (schema: z.ZodType) => {
             }) as {
                 body?: Request["body"];
                 params?: Request["params"];
-                query?: Request["query"];
+                query?: Record<string, unknown>;
             };
 
             req.body = parsedData.body ?? req.body;
             req.params = parsedData.params ?? req.params;
-            req.query = parsedData.query ?? req.query;
+            req.validatedQuery = parsedData.query ?? req.query;
 
             next();
         } catch (error) {
