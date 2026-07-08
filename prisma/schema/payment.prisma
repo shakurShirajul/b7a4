@@ -1,7 +1,18 @@
 model Payment {
-    id Int @id @default(autoincrement())
-    user User @relation(fields: [userId], references: [id])
-    userId Int
-    transactionId String @unique
+    id                      Int             @id @default(autoincrement())
+    payer                   User            @relation(fields: [payerId], references: [id])
+    payerId                 Int
+    rental                  Rental          @relation(fields: [rentalId], references: [id])
+    rentalId                Int
+    transactionId           String          @unique
+    provider                PaymentProvider @default(STRIPE)
+    amount                  Decimal         @db.Decimal(10, 2)
+    currency                String          @default("bdt")
+    status                  PaymentStatus   @default(PENDING)
+    stripeCheckoutSessionId String?         @unique
+    stripePaymentIntentId   String?         @unique
+    paidAt                  DateTime?
 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

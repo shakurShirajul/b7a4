@@ -20,3 +20,16 @@ enum RentalStatus {
     APPROVED
     REJECTED
 }
+
+enum PaymentProvider {
+    STRIPE
+    SSLCOMMERZ
+}
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+    REFUNDED
+}

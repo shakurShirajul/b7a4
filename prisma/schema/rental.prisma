@@ -10,6 +10,7 @@ model Rental {
     status     RentalStatus @default(PENDING)
 
     review Review?
+    payments Payment[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

@@ -9,6 +9,8 @@ import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { categoryRoutes } from "./modules/category/category.routes";
 import { rentalRoutes } from "./modules/rental/rental.routes";
 import { reviewRoutes } from "./modules/review/review.routes";
+import { paymentRoutes } from "./modules/payment/payment.routes";
+import { paymentController } from "./modules/payment/payment.controller";
 
 
 const app: Application = express();
@@ -17,6 +19,7 @@ app.use(cors({
     origin: config.app_url,
     credentials: true,
 }));
+app.post("/api/payments/webhook", express.raw({ type: "application/json" }), paymentController.handleStripeWebhook);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -30,6 +33,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/rentals", rentalRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 
