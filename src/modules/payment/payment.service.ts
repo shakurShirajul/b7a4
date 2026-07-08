@@ -14,10 +14,36 @@ const getStripeClient = () => {
     return new Stripe(config.stripe_secret_key);
 };
 
+const getCheckoutBaseUrl = () => {
+    const configuredUrl = config.client_url || config.app_url;
+
+    if (!configuredUrl) {
+        throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "CLIENT_URL or APP_URL must be configured for Stripe Checkout"
+        );
+    }
+
+    const urlWithScheme = /^https?:\/\//i.test(configuredUrl)
+        ? configuredUrl
+        : `https://${configuredUrl}`;
+
+    try {
+        const url = new URL(urlWithScheme);
+        return url.origin;
+    } catch {
+        throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "CLIENT_URL or APP_URL must be a valid absolute URL"
+        );
+    }
+};
+
 const createPaymentIntoDB = async (payload: ICreatePaymentPayload) => {
     const { rentalId, payerId } = payload;
 
     const stripe = getStripeClient();
+    const checkoutBaseUrl = getCheckoutBaseUrl();
 
     const rental = await prisma.rental.findFirst({
         where: {
@@ -56,9 +82,8 @@ const createPaymentIntoDB = async (payload: ICreatePaymentPayload) => {
 
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card"],
-        success_url: `${config.client_url}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${config.client_url}/payment/cancel`,
+        success_url: `${checkoutBaseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${checkoutBaseUrl}/payment/cancel`,
         customer_email: undefined,
         metadata: {
             rentalId: String(rental.id),

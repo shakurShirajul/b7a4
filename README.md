@@ -39,6 +39,33 @@ To seed the database with demo users, categories, properties, rentals, Stripe-st
 pnpm seed
 ```
 
+## Demo Credentials For Postman
+
+After running `pnpm seed`, you can use these accounts in Postman:
+
+```txt
+Admin
+Email: admin@rentnest.com
+Password: Admin@123456
+
+Tenant for payment demo
+Email: tenant.maliha@rentnest.com
+Password: Password@123
+
+Landlord for approval demo
+Email: landlord.ayesha@rentnest.com
+Password: Password@123
+```
+
+For payment testing:
+
+1. Run `Auth > Tenant Login (Use Before Create Payment)`.
+2. Use an approved unpaid rental id for `{{rentalId}}`.
+3. Run `Payments > Create Stripe Payment`.
+4. Open the returned `checkoutUrl`.
+5. Pay with Stripe test card `4242 4242 4242 4242`.
+6. Run `Payments > Confirm Stripe Payment` with the returned `sessionId`.
+
 ## API Documentation
 
 Postman documentation is available in:

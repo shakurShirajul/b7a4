@@ -41,6 +41,30 @@
     {
       "key": "stripeSessionId",
       "value": ""
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@rentnest.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin@123456"
+    },
+    {
+      "key": "tenantEmail",
+      "value": "tenant.maliha@rentnest.com"
+    },
+    {
+      "key": "tenantPassword",
+      "value": "Password@123"
+    },
+    {
+      "key": "landlordEmail",
+      "value": "landlord.ayesha@rentnest.com"
+    },
+    {
+      "key": "landlordPassword",
+      "value": "Password@123"
     }
   ],
   "auth": {
@@ -74,7 +98,7 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Login",
+          "name": "Admin Login",
           "event": [
             {
               "listen": "test",
@@ -100,7 +124,73 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@rentnest.com\",\n  \"password\": \"Admin@123456\"\n}"
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Tenant Login (Use Before Create Payment)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data?.accessToken) pm.collectionVariables.set('accessToken', json.data.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Run this before Payments > Create Stripe Payment. Seeded tenant.maliha@rentnest.com has an approved unpaid rental after pnpm seed.",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{tenantEmail}}\",\n  \"password\": \"{{tenantPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Landlord Login (Use Before Approving Rental)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data?.accessToken) pm.collectionVariables.set('accessToken', json.data.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Run this before Rentals > Update Rental Status when approving a rental for a property owned by this landlord.",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{landlordEmail}}\",\n  \"password\": \"{{landlordPassword}}\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/login"
           }
@@ -508,6 +598,7 @@
         {
           "name": "Create Stripe Payment",
           "request": {
+            "description": "Requires tenant token. Run Auth > Tenant Login first. The rentalId must belong to this tenant and have status APPROVED.",
             "method": "POST",
             "header": [
               {
@@ -525,6 +616,7 @@
         {
           "name": "Confirm Stripe Payment",
           "request": {
+            "description": "Requires tenant or admin token. Use the sessionId returned from Create Stripe Payment after completing Stripe Checkout.",
             "method": "POST",
             "header": [
               {
