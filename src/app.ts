@@ -47,7 +47,17 @@ app.use("/api/rentals", rentalRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payments", paymentRoutes);
 
-
+app.use((req: Request, res: Response) => {
+    res.status(404).json({
+        success: false,
+        message: "API endpoint not found",
+        errorDetails: [
+            {
+                message: `${req.method} ${req.originalUrl} not found`,
+            },
+        ],
+    });
+});
 
 app.use(globalErrorHandler);
 
