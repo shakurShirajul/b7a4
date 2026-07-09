@@ -51,11 +51,9 @@ const createCategoryIntoDB = async (categoryData: Omit<ICategory, 'id' | 'slug'>
     return newCategory
 }
 
-const udpateCategoryIntoDB = async (categoryData: Omit<ICategory, 'slug'>) => {
+const updateCategoryIntoDB = async (categoryData: Partial<Omit<ICategory, 'slug'>> & Pick<ICategory, 'id'>) => {
     const { id, name, description } = categoryData;
 
-    const categoryDescription = description ?? "";
-    const slug = name.toLowerCase().replace(/\s+/g, '-');
     const category = await prisma.category.findUnique({
         where: {
             id
@@ -66,13 +64,15 @@ const udpateCategoryIntoDB = async (categoryData: Omit<ICategory, 'slug'>) => {
         throw new AppError(httpStatus.NOT_FOUND, "Category not found");
     }
 
+    const slug = name ? name.toLowerCase().replace(/\s+/g, '-') : undefined;
+
     const updatedCategory = await prisma.category.update({
         where: {
             id
         },
         data: {
             name,
-            description: categoryDescription,
+            description,
             slug
         }
     })
@@ -83,11 +83,25 @@ const deleteCategoryFromDB = async (categoryId: number) => {
     const category = await prisma.category.findUnique({
         where: {
             id: categoryId
+        },
+        include: {
+            _count: {
+                select: {
+                    properties: true
+                }
+            }
         }
     });
 
     if (!category) {
         throw new AppError(httpStatus.NOT_FOUND, "Category not found");
+    }
+
+    if (category._count.properties > 0) {
+        throw new AppError(
+            httpStatus.CONFLICT,
+            "Category cannot be deleted because it has related properties"
+        );
     }
 
     const deletedCategory = await prisma.category.delete({
@@ -102,6 +116,6 @@ export const categoryService = {
     getAllCategoriesFromDB,
     getCategoryByIdFromDB,
     createCategoryIntoDB,
-    udpateCategoryIntoDB,
+    updateCategoryIntoDB,
     deleteCategoryFromDB
 }

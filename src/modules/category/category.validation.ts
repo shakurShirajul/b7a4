@@ -20,6 +20,8 @@ const updateCategoryValidation = z.object({
     body: z.object({
         name: z.string().trim().min(1, "Category name is required"),
         description: z.string().trim().optional(),
+    }).partial().refine((body) => Object.keys(body).length > 0, {
+        message: "At least one field is required",
     }),
 });
 

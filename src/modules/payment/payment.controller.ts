@@ -23,7 +23,8 @@ const createPayment = catchAsync(async (req: Request, res: Response, next: NextF
 
 const confirmPayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { sessionId } = req.body;
-    const payment = await paymentService.confirmStripePaymentIntoDB(sessionId);
+    const payerId = req.user?.role === "TENANT" ? Number(req.user.userId) : undefined;
+    const payment = await paymentService.confirmStripePaymentIntoDB(sessionId, { payerId });
 
     return sendResponse(res, {
         success: true,

@@ -72,7 +72,7 @@ const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     })
 })
 
-const udpateUserStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {  
+const updateUserStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {  
     const userId = req.params.id;
     const { status } = req.body;
 
@@ -92,5 +92,5 @@ export const userController = {
     getMe,
     registerUser,
     updateUser,
-    udpateUserStatus
+    updateUserStatus
 }

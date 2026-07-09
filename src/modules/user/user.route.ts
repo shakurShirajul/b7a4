@@ -12,6 +12,6 @@ router.get("/:id", auth("ADMIN"), validateRequest(userValidation.idParamValidati
 router.post("/register", validateRequest(userValidation.registerUserValidation), userController.registerUser);
 router.patch("/update", auth(), validateRequest(userValidation.updateUserValidation), userController.updateUser);
 router.patch("/me", auth(), validateRequest(userValidation.updateUserValidation), userController.updateUser);
-router.patch("/status/:id", auth("ADMIN"), validateRequest(userValidation.updateUserStatusValidation), userController.udpateUserStatus);
+router.patch("/status/:id", auth("ADMIN"), validateRequest(userValidation.updateUserStatusValidation), userController.updateUserStatus);
 
 export const userRoutes: Router = router;

@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { randomUUID } from "crypto";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
-import { ICreatePaymentPayload, IPaymentFilter } from "./payment.interface";
+import { IConfirmPaymentOptions, ICreatePaymentPayload, IPaymentFilter } from "./payment.interface";
 import { AppError } from "../../errors/AppError";
 import httpStatus from "http-status";
 
@@ -125,7 +125,7 @@ const createPaymentIntoDB = async (payload: ICreatePaymentPayload) => {
     };
 };
 
-const confirmStripePaymentIntoDB = async (sessionId: string) => {
+const confirmStripePaymentIntoDB = async (sessionId: string, options?: IConfirmPaymentOptions) => {
     const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -137,6 +137,10 @@ const confirmStripePaymentIntoDB = async (sessionId: string) => {
 
     if (!payment) {
         throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+    }
+
+    if (options?.payerId && payment.payerId !== options.payerId) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to confirm this payment");
     }
 
     const paymentIntentId = typeof session.payment_intent === "string"

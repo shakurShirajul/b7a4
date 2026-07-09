@@ -36,7 +36,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/", (req: Request, res: Response) => {
-    res.send("Hello World!");
+    res.status(200).json({
+        success: true,
+        message: "RentNest API is running",
+    });
 });
 
 app.use("/api/users", userRoutes);

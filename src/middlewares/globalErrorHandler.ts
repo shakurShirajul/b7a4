@@ -30,12 +30,12 @@ export const globalErrorHandler = (
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         const statusCodeByCode: Record<string, number> = {
             P2002: httpStatus.CONFLICT,
-            P2003: httpStatus.BAD_REQUEST,
+            P2003: httpStatus.CONFLICT,
             P2025: httpStatus.NOT_FOUND,
         };
         const messageByCode: Record<string, string> = {
             P2002: "Duplicate value violates a unique constraint",
-            P2003: "Invalid relation reference",
+            P2003: "Cannot delete this record because related data exists",
             P2025: "Record not found",
         };
         const statusCode = statusCodeByCode[error.code] || httpStatus.BAD_REQUEST;

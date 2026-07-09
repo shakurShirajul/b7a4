@@ -40,7 +40,7 @@ const createCategory = catchAsync(async (req: Request, res: Response, next: Next
 const updateCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const categoryId = req.params.id;
     const payload = req.body;
-    const category = await categoryService.udpateCategoryIntoDB({id: Number(categoryId), ...payload});
+    const category = await categoryService.updateCategoryIntoDB({id: Number(categoryId), ...payload});
     return sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,

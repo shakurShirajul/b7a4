@@ -214,11 +214,26 @@ const deletePropertyFromDB = async (propertyId: number, landlordId: number) => {
         where: {
             id: propertyId,
             landlordId
+        },
+        include: {
+            _count: {
+                select: {
+                    rentals: true,
+                    reviews: true
+                }
+            }
         }
     })
 
     if (!property) {
         throw new AppError(httpStatus.NOT_FOUND, "Property does not exist");
+    }
+
+    if (property._count.rentals > 0 || property._count.reviews > 0) {
+        throw new AppError(
+            httpStatus.CONFLICT,
+            "Property cannot be deleted because it has related rental history, payments, or reviews"
+        );
     }
 
     const deletePropertyFromDB = prisma.property.delete({

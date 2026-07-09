@@ -155,8 +155,8 @@ const updateRentalStatusIntoDB = async (rentalData: IUpdateRentalStatusPayload) 
         throw new AppError(httpStatus.BAD_REQUEST, "Pending rentals can only be approved, rejected, or cancelled");
     }
 
-    if (existingRental.status === "APPROVED" && !["ACTIVE", "CANCELLED"].includes(status)) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Approved rentals can only be activated by payment or cancelled");
+    if (existingRental.status === "APPROVED" && status !== "CANCELLED") {
+        throw new AppError(httpStatus.BAD_REQUEST, "Approved rentals become active only after completed payment");
     }
 
     if (existingRental.status === "ACTIVE" && !["COMPLETED", "CANCELLED"].includes(status)) {
