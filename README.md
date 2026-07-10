@@ -7,17 +7,6 @@ RentNest is a backend API for a rental property marketplace. Tenants can browse 
 - Production: `https://b7a4-beta.vercel.app`
 - Health check: `GET /`
 
-## Mandatory Submission Checklist
-
-| Requirement | Status |
-|---|---|
-| API Documentation | Done. See [RentNest.postman_collection.json](./RentNest.postman_collection.json). |
-| Consistent Error Responses | Done. Errors return `{ success, message, errorDetails }`. |
-| Commits | Done. Repository has 20 backend commits at time of review. |
-| Input Validation | Done. Zod validation is used for endpoints with body, params, or query input. |
-| Admin Credentials | Provided below. Seed script included. |
-| Payment Integration | Done. Stripe checkout/session integration is implemented. |
-
 ## Admin Credentials
 
 Use these credentials for evaluator/admin testing after running the admin seed script:
