@@ -11,6 +11,7 @@ import { rentalRoutes } from "./modules/rental/rental.routes";
 import { reviewRoutes } from "./modules/review/review.routes";
 import { paymentRoutes } from "./modules/payment/payment.routes";
 import { paymentController } from "./modules/payment/payment.controller";
+import { uploadRoutes } from "./modules/upload/upload.routes";
 
 
 const app: Application = express();
@@ -49,6 +50,7 @@ app.use("/api/properties", propertyRoutes);
 app.use("/api/rentals", rentalRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({
