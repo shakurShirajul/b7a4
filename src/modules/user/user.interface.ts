@@ -1,4 +1,4 @@
-type Role = "TENANT" | "LANDLORD"
+type Role = "TENANT" | "LANDLORD" | "ADMIN"
 type UserStatus = "ACTIVE" | "BANNED"
 export interface RegisterUserPayload{
     name: string
